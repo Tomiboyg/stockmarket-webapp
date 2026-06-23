@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../services/supabase'
 import { useAuth } from '../context/AuthContext'
 import { Star } from 'lucide-react'
@@ -11,32 +11,53 @@ export default function WatchlistButton({ symbol }: Props) {
   const { user } = useAuth()
   const [isWatched, setIsWatched] = useState(false)
   const [loading, setLoading] = useState(true)
+  const mountedRef = useRef(true)
 
   useEffect(() => {
-    if (!user) return
-    supabase
-      .from('watchlists')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('symbol', symbol)
-      .maybeSingle()
-      .then(({ data }) => {
-        setIsWatched(!!data)
-        setLoading(false)
-      })
+    mountedRef.current = true
+    return () => { mountedRef.current = false }
+  }, [])
+
+  useEffect(() => {
+    if (!user) {
+      setLoading(false)
+      return
+    }
+
+    const check = async () => {
+      try {
+        const { data } = await supabase
+          .from('watchlists')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('symbol', symbol)
+          .maybeSingle()
+        if (mountedRef.current) {
+          setIsWatched(!!data)
+          setLoading(false)
+        }
+      } catch {
+        if (mountedRef.current) setLoading(false)
+      }
+    }
+    check()
   }, [user, symbol])
 
   const toggle = async () => {
     if (!user) return
     setLoading(true)
-    if (isWatched) {
-      await supabase.from('watchlists').delete().eq('user_id', user.id).eq('symbol', symbol)
-      setIsWatched(false)
-    } else {
-      await supabase.from('watchlists').insert({ user_id: user.id, symbol })
-      setIsWatched(true)
+    try {
+      if (isWatched) {
+        await supabase.from('watchlists').delete().eq('user_id', user.id).eq('symbol', symbol)
+        if (mountedRef.current) setIsWatched(false)
+      } else {
+        await supabase.from('watchlists').insert({ user_id: user.id, symbol })
+        if (mountedRef.current) setIsWatched(true)
+      }
+    } catch {
+      // silently fail
     }
-    setLoading(false)
+    if (mountedRef.current) setLoading(false)
   }
 
   if (!user) return null

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   getQuote,
@@ -20,22 +20,39 @@ export default function StockDetail() {
   const [profile, setProfile] = useState<StockProfile | null>(null)
   const [candles, setCandles] = useState<CandleData[]>([])
   const [loading, setLoading] = useState(true)
+  const mountedRef = useRef(true)
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => { mountedRef.current = false }
+  }, [])
 
   useEffect(() => {
     if (!symbol) return
 
     setLoading(true)
     const load = async () => {
-      const [q, p, c] = await Promise.all([
-        getQuote(symbol),
-        getProfile(symbol),
-        getCandles(symbol, 'D', 365),
-      ])
+      try {
+        const [q, p, c] = await Promise.all([
+          getQuote(symbol).catch(() => null),
+          getProfile(symbol).catch(() => null),
+          getCandles(symbol, 'D', 365).catch(() => null),
+        ])
 
-      setQuote(q || generateMockQuote(symbol))
-      setProfile(p || generateMockProfile(symbol))
-      setCandles(c && c.length > 0 ? c : generateMockCandles(symbol, 365))
-      setLoading(false)
+        if (mountedRef.current) {
+          setQuote(q || generateMockQuote(symbol))
+          setProfile(p || generateMockProfile(symbol))
+          setCandles(c && c.length > 0 ? c : generateMockCandles(symbol, 365))
+          setLoading(false)
+        }
+      } catch {
+        if (mountedRef.current) {
+          setQuote(generateMockQuote(symbol))
+          setProfile(generateMockProfile(symbol))
+          setCandles(generateMockCandles(symbol, 365))
+          setLoading(false)
+        }
+      }
     }
     load()
   }, [symbol])

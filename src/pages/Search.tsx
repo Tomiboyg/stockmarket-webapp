@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { searchStocks, generateMockSearchResults, getQuote, generateMockQuote } from '../services/finnhub'
 import type { SearchResult, StockQuote } from '../types'
@@ -19,40 +19,72 @@ export default function Search() {
   const [results, setResults] = useState<SearchResult[]>([])
   const [quotes, setQuotes] = useState<Record<string, StockQuote | null>>({})
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const debouncedQuery = useDebounce(query, 300)
   const navigate = useNavigate()
+  const mountedRef = useRef(true)
 
   useEffect(() => {
     inputRef.current?.focus()
+    return () => { mountedRef.current = false }
   }, [])
 
   useEffect(() => {
     if (!debouncedQuery || debouncedQuery.length < 1) {
       setResults([])
       setQuotes({})
+      setError('')
       return
     }
 
     setLoading(true)
+    setError('')
+
     const fetchResults = async () => {
-      let searchResults = await searchStocks(debouncedQuery)
-      if (searchResults.length === 0) {
-        searchResults = generateMockSearchResults(debouncedQuery)
-      }
+      try {
+        let searchResults: SearchResult[] = []
+        try {
+          searchResults = await searchStocks(debouncedQuery)
+        } catch {
+          searchResults = []
+        }
 
-      setResults(searchResults)
+        if (!mountedRef.current) return
 
-      const quoteMap: Record<string, StockQuote | null> = {}
-      for (const r of searchResults) {
-        const q = await getQuote(r.symbol)
-        quoteMap[r.symbol] = q || generateMockQuote(r.symbol)
+        if (searchResults.length === 0) {
+          searchResults = generateMockSearchResults(debouncedQuery)
+        }
+
+        setResults(searchResults)
+
+        const quoteMap: Record<string, StockQuote | null> = {}
+        for (const r of searchResults) {
+          try {
+            const q = await getQuote(r.symbol)
+            quoteMap[r.symbol] = q || generateMockQuote(r.symbol)
+          } catch {
+            quoteMap[r.symbol] = generateMockQuote(r.symbol)
+          }
+        }
+        if (mountedRef.current) {
+          setQuotes(quoteMap)
+          setLoading(false)
+        }
+      } catch {
+        if (mountedRef.current) {
+          setError('Search failed. Try a different query.')
+          setLoading(false)
+        }
       }
-      setQuotes(quoteMap)
-      setLoading(false)
     }
+
     fetchResults()
   }, [debouncedQuery])
+
+  const handleSelect = useCallback((symbol: string) => {
+    navigate(`/stock/${encodeURIComponent(symbol)}`)
+  }, [navigate])
 
   return (
     <div className="p-6 max-w-3xl">
@@ -74,7 +106,13 @@ export default function Search() {
         <div className="text-zinc-600 text-xs">Searching...</div>
       )}
 
-      {!loading && results.length === 0 && debouncedQuery && (
+      {error && (
+        <div className="text-zinc-600 text-xs border border-zinc-800 rounded p-4">
+          {error}
+        </div>
+      )}
+
+      {!loading && !error && results.length === 0 && debouncedQuery && (
         <div className="text-zinc-600 text-xs border border-zinc-800 rounded p-4">
           No results for "{debouncedQuery}"
         </div>
@@ -89,7 +127,7 @@ export default function Search() {
               <div
                 key={`${r.symbol}-${idx}`}
                 className="flex items-center justify-between px-4 py-3 border-b border-zinc-800/50 last:border-0 hover:bg-zinc-900/30 cursor-pointer transition-colors"
-                onClick={() => navigate(`/stock/${r.symbol}`)}
+                onClick={() => handleSelect(r.symbol)}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div>
