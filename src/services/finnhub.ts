@@ -1,4 +1,4 @@
-import type { StockQuote, StockProfile, SearchResult, CandleData } from '../types'
+import type { StockQuote, StockProfile, SearchResult, CandleData, NewsItem } from '../types'
 
 const API_KEY = import.meta.env.VITE_FINNHUB_API_KEY
 const BASE_URL = 'https://finnhub.io/api/v1'
@@ -48,11 +48,15 @@ export async function searchStocks(query: string): Promise<SearchResult[]> {
 }
 
 export async function getQuote(symbol: string): Promise<StockQuote | null> {
-  return fetchJson<StockQuote>(`/quote?symbol=${encodeURIComponent(symbol)}`)
+  const data = await fetchJson<Partial<StockQuote>>(`/quote?symbol=${encodeURIComponent(symbol)}`)
+  if (!data || typeof data.c !== 'number') return null
+  return data as StockQuote
 }
 
 export async function getProfile(symbol: string): Promise<StockProfile | null> {
-  return fetchJson<StockProfile>(`/stock/profile2?symbol=${encodeURIComponent(symbol)}`)
+  const data = await fetchJson<Partial<StockProfile>>(`/stock/profile2?symbol=${encodeURIComponent(symbol)}`)
+  if (!data || !data.name) return null
+  return data as StockProfile
 }
 
 export async function getCandles(
@@ -148,6 +152,34 @@ export function generateMockProfile(symbol: string): StockProfile {
     finnhubIndustry: 'Technology',
     exchange: 'NASDAQ',
   }
+}
+
+export async function getNews(symbol: string): Promise<NewsItem[]> {
+  const now = Math.floor(Date.now() / 1000)
+  const from = now - 7 * 86400
+  const data = await fetchJson<NewsItem[]>(`/company-news?symbol=${encodeURIComponent(symbol)}&from=${from}&to=${now}`)
+  if (!data || data.length === 0) return []
+  return data.slice(0, 5)
+}
+
+export function generateMockNews(symbol: string): NewsItem[] {
+  const headlines = [
+    `${symbol} Reports Strong Quarterly Earnings, Beats Estimates`,
+    `${symbol} Announces New Strategic Partnership Initiative`,
+    `Analysts Upgrade ${symbol} Citing Growth Potential`,
+    `${symbol} Expands Operations into New Markets`,
+    `${symbol} Board Approves Share Buyback Program`,
+    `Market Rally Lifts ${symbol} to New Highs`,
+    `${symbol} Innovation Pipeline Shows Promising Results`,
+  ]
+  const now = Date.now()
+  return headlines.map((headline, i) => ({
+    headline,
+    summary: `${symbol} continues to demonstrate strong performance in its sector. Market analysts remain optimistic about the company's growth trajectory and strategic direction.`,
+    url: '#',
+    source: ['Reuters', 'Bloomberg', 'CNBC', 'Financial Times', 'WSJ'][i % 5],
+    datetime: now - i * 3600000,
+  }))
 }
 
 export function generateMockSearchResults(query: string): SearchResult[] {

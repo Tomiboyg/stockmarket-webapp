@@ -41,3 +41,12 @@ export interface WatchlistItem {
   symbol: string
   created_at: string
 }
+
+export interface NewsItem {
+  headline: string
+  summary: string
+  url: string
+  source: string
+  datetime: number
+  image?: string
+}
