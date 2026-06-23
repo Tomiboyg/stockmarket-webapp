@@ -105,10 +105,10 @@ export default function StockDetail() {
           {quote && (
             <div className="flex items-baseline gap-3 mt-2">
               <span className="text-2xl font-mono tabular-nums font-medium text-white">
-                ${quote.c.toFixed(2)}
+                ${(quote.c ?? 0).toFixed(2)}
               </span>
               <span className={`font-mono text-sm tabular-nums ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
-                {isUp ? '+' : ''}{quote.d.toFixed(2)} ({isUp ? '+' : ''}{quote.dp.toFixed(2)}%)
+                {isUp ? '+' : ''}{(quote.d ?? 0).toFixed(2)} ({isUp ? '+' : ''}{(quote.dp ?? 0).toFixed(2)}%)
               </span>
             </div>
           )}
@@ -127,10 +127,10 @@ export default function StockDetail() {
             <div className="border border-zinc-800 rounded p-4 mb-6">
               <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3">Statistics</h2>
               <div className="grid grid-cols-2 gap-3">
-                <Stat label="Open" value={`$${quote.o.toFixed(2)}`} />
-                <Stat label="High" value={`$${quote.h.toFixed(2)}`} />
-                <Stat label="Low" value={`$${quote.l.toFixed(2)}`} />
-                <Stat label="Prev. Close" value={`$${quote.pc.toFixed(2)}`} />
+                <Stat label="Open" value={`$${(quote.o ?? 0).toFixed(2)}`} />
+                <Stat label="High" value={`$${(quote.h ?? 0).toFixed(2)}`} />
+                <Stat label="Low" value={`$${(quote.l ?? 0).toFixed(2)}`} />
+                <Stat label="Prev. Close" value={`$${(quote.pc ?? 0).toFixed(2)}`} />
               </div>
             </div>
           )}

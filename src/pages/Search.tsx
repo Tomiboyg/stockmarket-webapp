@@ -129,10 +129,10 @@ export default function Search() {
 
                 {q && (
                   <div className="text-right flex-shrink-0">
-                    <div className="font-mono text-sm tabular-nums text-zinc-100">${q.c.toFixed(2)}</div>
+                    <div className="font-mono text-sm tabular-nums text-zinc-100">${(q.c ?? 0).toFixed(2)}</div>
                     <div className={`font-mono text-xs flex items-center gap-1 justify-end ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
                       {isUp ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
-                      {isUp ? '+' : ''}{q.dp.toFixed(2)}%
+                      {isUp ? '+' : ''}{(q.dp ?? 0).toFixed(2)}%
                     </div>
                   </div>
                 )}

@@ -49,7 +49,7 @@ export async function searchStocks(query: string): Promise<SearchResult[]> {
 
 export async function getQuote(symbol: string): Promise<StockQuote | null> {
   const data = await fetchJson<Partial<StockQuote>>(`/quote?symbol=${encodeURIComponent(symbol)}`)
-  if (!data || typeof data.c !== 'number') return null
+  if (!data || typeof data.c !== 'number' || typeof data.d !== 'number' || typeof data.dp !== 'number') return null
   return data as StockQuote
 }
 

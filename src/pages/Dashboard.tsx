@@ -22,9 +22,9 @@ function IndexCard({ symbol, quote, loading }: { symbol: string; quote: StockQuo
   return (
     <div className="border border-zinc-800 rounded px-4 py-3 hover:border-zinc-700 transition-colors">
       <div className="text-zinc-500 text-xs font-mono tracking-wide">{symbol}</div>
-      <div className="text-lg font-mono font-medium text-white mt-0.5">${quote.c.toFixed(2)}</div>
+      <div className="text-lg font-mono font-medium text-white mt-0.5">${(quote.c ?? 0).toFixed(2)}</div>
       <div className={`text-xs font-mono mt-0.5 ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
-        {isUp ? '+' : ''}{quote.dp.toFixed(2)}%
+        {isUp ? '+' : ''}{(quote.dp ?? 0).toFixed(2)}%
       </div>
     </div>
   )
@@ -165,12 +165,12 @@ export default function Dashboard() {
                       onClick={() => navigate(`/stock/${encodeURIComponent(sym)}`)}
                     >
                       <td className="px-4 py-3 font-mono text-zinc-200 text-sm">{sym}</td>
-                      <td className="px-4 py-3 text-right font-mono text-zinc-100">${q.c.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-right font-mono text-zinc-100">${(q.c ?? 0).toFixed(2)}</td>
                       <td className={`px-4 py-3 text-right font-mono ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
-                        {isUp ? '+' : ''}{q.d.toFixed(2)}
+                        {isUp ? '+' : ''}{(q.d ?? 0).toFixed(2)}
                       </td>
                       <td className={`px-4 py-3 text-right font-mono ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
-                        {isUp ? '+' : ''}{q.dp.toFixed(2)}%
+                        {isUp ? '+' : ''}{(q.dp ?? 0).toFixed(2)}%
                       </td>
                     </tr>
                   )
