@@ -12,7 +12,7 @@ const INDEX_SYMBOLS = ['SPY', 'QQQ', 'DIA']
 function IndexCard({ symbol, quote, loading }: { symbol: string; quote: StockQuote | null; loading: boolean }) {
   if (loading) {
     return (
-      <div className="border border-zinc-800 rounded px-4 py-3">
+      <div className="border border-[#161619] rounded px-5 py-4">
         <div className="text-zinc-600 text-xs font-mono">{symbol}</div>
         <div className="text-zinc-700 text-sm mt-1">--</div>
       </div>
@@ -21,10 +21,13 @@ function IndexCard({ symbol, quote, loading }: { symbol: string; quote: StockQuo
   if (!quote) return null
   const isUp = quote.dp >= 0
   return (
-    <div className="border border-zinc-800 rounded px-4 py-3 hover:border-zinc-700 transition-colors">
-      <div className="text-zinc-500 text-xs font-mono tracking-wide">{symbol}</div>
-      <div className="text-lg font-mono font-medium text-white mt-0.5">${(quote.c ?? 0).toFixed(2)}</div>
-      <div className={`text-xs font-mono mt-0.5 ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+    <div className="border border-[#161619] rounded px-5 py-4 hover:border-zinc-700/30 transition-colors bg-[#050507]/20">
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-zinc-500 text-[10px] font-mono tracking-widest uppercase">{symbol}</div>
+        <div className={`w-1.5 h-1.5 rounded-full ${isUp ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+      </div>
+      <div className="text-xl font-mono font-medium text-white/90 tracking-tight">${(quote.c ?? 0).toFixed(2)}</div>
+      <div className={`text-[11px] font-mono mt-1 ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
         {isUp ? '+' : ''}{(quote.dp ?? 0).toFixed(2)}%
       </div>
     </div>
@@ -187,64 +190,68 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 max-w-5xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-medium">Overview</h1>
+    <div className="w-full space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-medium text-white/90">Overview</h1>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mb-8">
+      {/* Index cards */}
+      <div className="grid grid-cols-3 gap-3">
         {INDEX_SYMBOLS.map((sym) => (
           <IndexCard key={sym} symbol={sym} quote={indexQuotes[sym]} loading={indexLoading} />
         ))}
       </div>
 
-      {/* Paper Portfolio Section */}
+      {/* Portfolio section */}
       {user && (
-        <div className="border-t border-zinc-800 pt-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-              <Wallet size={14} />
+        <div className="space-y-5">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-medium text-zinc-500 flex items-center gap-2 uppercase tracking-widest">
+              <Wallet size={12} />
               Paper Portfolio
             </h2>
             <button
               onClick={() => setResetConfirm(true)}
-              className="text-xs text-zinc-600 hover:text-rose-500 flex items-center gap-1 transition-colors"
+              className="text-[10px] text-zinc-600 hover:text-rose-500 flex items-center gap-1 transition-colors font-mono uppercase tracking-wider"
             >
-              <RefreshCw size={12} />
+              <RefreshCw size={11} />
               Reset
             </button>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            <div className="border border-zinc-800 rounded px-4 py-3">
-              <div className="text-[10px] text-zinc-600 uppercase tracking-wide">Portfolio Value</div>
-              <div className="text-lg font-mono font-medium text-white mt-0.5">{formatCash(portfolioValue)}</div>
+          {/* KPI row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="border border-[#161619] rounded px-5 py-4 bg-[#050507]/20">
+              <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mb-1">Portfolio Value</div>
+              <div className="text-xl font-mono font-medium text-white/90 tracking-tight">{formatCash(portfolioValue)}</div>
             </div>
-            <div className="border border-zinc-800 rounded px-4 py-3">
-              <div className="text-[10px] text-zinc-600 uppercase tracking-wide">Cash Balance</div>
-              <div className="text-lg font-mono font-medium text-white mt-0.5">{formatCash(cash)}</div>
+            <div className="border border-[#161619] rounded px-5 py-4 bg-[#050507]/20">
+              <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mb-1">Cash Balance</div>
+              <div className="text-xl font-mono font-medium text-white/90 tracking-tight">{formatCash(cash)}</div>
             </div>
-            <div className="border border-zinc-800 rounded px-4 py-3">
-              <div className="text-[10px] text-zinc-600 uppercase tracking-wide">Total P&amp;L</div>
-              <div className={`text-lg font-mono font-medium mt-0.5 ${hasGain ? 'text-emerald-500' : 'text-rose-500'}`}>
+            <div className="border border-[#161619] rounded px-5 py-4 bg-[#050507]/20">
+              <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mb-1">Total P&amp;L</div>
+              <div className={`text-xl font-mono font-medium tracking-tight ${hasGain ? 'text-emerald-500' : 'text-rose-500'}`}>
                 {hasGain ? '+' : ''}{totalGainAbs.toFixed(2)} ({hasGain ? '+' : ''}{totalGainPct.toFixed(2)}%)
               </div>
             </div>
           </div>
 
+          {/* Reset confirmation */}
           {resetConfirm && (
-            <div className="border border-rose-900/50 rounded px-4 py-3 mb-4 flex items-center justify-between">
+            <div className="border border-rose-900/40 rounded px-5 py-3 flex items-center justify-between bg-rose-950/10">
               <span className="text-xs text-rose-500">Reset your portfolio to $100,000? This cannot be undone.</span>
               <div className="flex gap-2">
                 <button
                   onClick={handleReset}
-                  className="text-xs bg-rose-600 hover:bg-rose-500 text-white px-3 py-1.5 rounded transition-colors"
+                  className="text-[10px] bg-rose-600 hover:bg-rose-500 text-white px-3 py-1.5 rounded transition-colors font-mono uppercase tracking-wider"
                 >
-                  Confirm Reset
+                  Confirm
                 </button>
                 <button
                   onClick={() => setResetConfirm(false)}
-                  className="text-xs text-zinc-500 hover:text-zinc-300 border border-zinc-800 px-3 py-1.5 rounded transition-colors"
+                  className="text-[10px] text-zinc-500 hover:text-zinc-300 border border-[#161619] px-3 py-1.5 rounded transition-colors font-mono uppercase tracking-wider"
                 >
                   Cancel
                 </button>
@@ -252,17 +259,18 @@ export default function Dashboard() {
             </div>
           )}
 
+          {/* Holdings table */}
           {holdings.length > 0 && (
-            <div className="border border-zinc-800 rounded overflow-hidden mb-4">
+            <div className="border border-[#161619] rounded overflow-hidden bg-[#050507]/20">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-800 text-zinc-500 text-xs">
-                    <th className="text-left px-4 py-2.5 font-medium">Symbol</th>
-                    <th className="text-right px-4 py-2.5 font-medium">Shares</th>
-                    <th className="text-right px-4 py-2.5 font-medium">Avg Price</th>
-                    <th className="text-right px-4 py-2.5 font-medium">Current</th>
-                    <th className="text-right px-4 py-2.5 font-medium">Market Value</th>
-                    <th className="text-right px-4 py-2.5 font-medium">P&amp;L</th>
+                  <tr className="border-b border-[#161619] text-zinc-600 text-[10px] uppercase tracking-widest font-mono">
+                    <th className="text-left px-5 py-3 font-medium">Symbol</th>
+                    <th className="text-right px-5 py-3 font-medium">Shares</th>
+                    <th className="text-right px-5 py-3 font-medium">Avg Price</th>
+                    <th className="text-right px-5 py-3 font-medium">Current</th>
+                    <th className="text-right px-5 py-3 font-medium">Market Value</th>
+                    <th className="text-right px-5 py-3 font-medium">P&amp;L</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -277,15 +285,15 @@ export default function Dashboard() {
                     return (
                       <tr
                         key={h.symbol}
-                        className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-900/30 cursor-pointer transition-colors"
+                        className="border-b border-[#161619]/50 last:border-0 hover:bg-[#0a0a0d] cursor-pointer transition-colors"
                         onClick={() => navigate(`/stock/${encodeURIComponent(h.symbol)}`)}
                       >
-                        <td className="px-4 py-3 font-mono text-zinc-200 text-sm">{h.symbol}</td>
-                        <td className="px-4 py-3 text-right font-mono text-zinc-300">{h.shares}</td>
-                        <td className="px-4 py-3 text-right font-mono text-zinc-300">{formatCash(h.average_buy_price)}</td>
-                        <td className="px-4 py-3 text-right font-mono text-zinc-100">{formatCash(currentPrice)}</td>
-                        <td className="px-4 py-3 text-right font-mono text-zinc-100">{formatCash(marketValue)}</td>
-                        <td className={`px-4 py-3 text-right font-mono ${plUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        <td className="px-5 py-3.5 font-mono text-zinc-200 text-sm">{h.symbol}</td>
+                        <td className="px-5 py-3.5 text-right font-mono text-zinc-300">{h.shares}</td>
+                        <td className="px-5 py-3.5 text-right font-mono text-zinc-300">{formatCash(h.average_buy_price)}</td>
+                        <td className="px-5 py-3.5 text-right font-mono text-zinc-100">{formatCash(currentPrice)}</td>
+                        <td className="px-5 py-3.5 text-right font-mono text-zinc-100">{formatCash(marketValue)}</td>
+                        <td className={`px-5 py-3.5 text-right font-mono ${plUp ? 'text-emerald-500' : 'text-rose-500'}`}>
                           {plUp ? '+' : ''}{plAbs.toFixed(2)} ({plUp ? '+' : ''}{plPct.toFixed(2)}%)
                         </td>
                       </tr>
@@ -297,45 +305,46 @@ export default function Dashboard() {
           )}
 
           {holdings.length === 0 && (
-            <div className="border border-zinc-800 rounded p-4 text-center mb-4">
-              <p className="text-zinc-600 text-xs">No holdings yet. Search for stocks and start trading.</p>
+            <div className="border border-[#161619] rounded p-6 text-center bg-[#050507]/20">
+              <p className="text-zinc-600 text-xs font-mono">No holdings yet. Search for stocks and start trading.</p>
             </div>
           )}
 
+          {/* Transaction history */}
           {transactions.length > 0 && (
             <div>
               <button
                 onClick={() => setTxOpen(!txOpen)}
-                className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors mb-3"
+                className="flex items-center gap-1.5 text-[10px] text-zinc-600 hover:text-zinc-300 transition-colors font-mono uppercase tracking-wider mb-3"
               >
-                <Clock size={12} />
-                Transaction History ({transactions.length})
+                <Clock size={11} />
+                History ({transactions.length})
                 <span className="text-zinc-700">{txOpen ? '▾' : '▸'}</span>
               </button>
               {txOpen && (
-                <div className="border border-zinc-800 rounded overflow-hidden">
+                <div className="border border-[#161619] rounded overflow-hidden bg-[#050507]/20">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-zinc-800 text-zinc-500 text-xs">
-                        <th className="text-left px-4 py-2.5 font-medium">Type</th>
-                        <th className="text-left px-4 py-2.5 font-medium">Symbol</th>
-                        <th className="text-right px-4 py-2.5 font-medium">Shares</th>
-                        <th className="text-right px-4 py-2.5 font-medium">Price</th>
-                        <th className="text-right px-4 py-2.5 font-medium">Total</th>
-                        <th className="text-right px-4 py-2.5 font-medium">Date</th>
+                      <tr className="border-b border-[#161619] text-zinc-600 text-[10px] uppercase tracking-widest font-mono">
+                        <th className="text-left px-5 py-3 font-medium">Type</th>
+                        <th className="text-left px-5 py-3 font-medium">Symbol</th>
+                        <th className="text-right px-5 py-3 font-medium">Shares</th>
+                        <th className="text-right px-5 py-3 font-medium">Price</th>
+                        <th className="text-right px-5 py-3 font-medium">Total</th>
+                        <th className="text-right px-5 py-3 font-medium">Date</th>
                       </tr>
                     </thead>
                     <tbody>
                       {transactions.slice(0, 50).map((tx) => (
-                        <tr key={tx.id} className="border-b border-zinc-800/50 last:border-0">
-                          <td className={`px-4 py-2.5 font-mono text-xs ${tx.type === 'BUY' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        <tr key={tx.id} className="border-b border-[#161619]/50 last:border-0">
+                          <td className={`px-5 py-3 font-mono text-xs ${tx.type === 'BUY' ? 'text-emerald-500' : 'text-rose-500'}`}>
                             {tx.type}
                           </td>
-                          <td className="px-4 py-2.5 font-mono text-zinc-300 text-xs">{tx.symbol}</td>
-                          <td className="px-4 py-2.5 text-right font-mono text-zinc-300 text-xs">{tx.shares}</td>
-                          <td className="px-4 py-2.5 text-right font-mono text-zinc-300 text-xs">{formatCash(tx.price)}</td>
-                          <td className="px-4 py-2.5 text-right font-mono text-zinc-300 text-xs">{formatCash(tx.total_amount)}</td>
-                          <td className="px-4 py-2.5 text-right font-mono text-zinc-600 text-xs">{formatTxTime(tx.executed_at)}</td>
+                          <td className="px-5 py-3 font-mono text-zinc-300 text-xs">{tx.symbol}</td>
+                          <td className="px-5 py-3 text-right font-mono text-zinc-300 text-xs">{tx.shares}</td>
+                          <td className="px-5 py-3 text-right font-mono text-zinc-300 text-xs">{formatCash(tx.price)}</td>
+                          <td className="px-5 py-3 text-right font-mono text-zinc-300 text-xs">{formatCash(tx.total_amount)}</td>
+                          <td className="px-5 py-3 text-right font-mono text-zinc-600 text-xs">{formatTxTime(tx.executed_at)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -347,45 +356,46 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="border-t border-zinc-800 pt-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-            <Star size={14} />
+      {/* Watchlist */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-medium text-zinc-500 flex items-center gap-2 uppercase tracking-widest">
+            <Star size={12} />
             Watchlist
           </h2>
           {watchlist.length > 0 && (
             <button
               onClick={() => navigate('/search')}
-              className="text-xs text-zinc-600 hover:text-zinc-300 flex items-center gap-1 transition-colors"
+              className="text-[10px] text-zinc-600 hover:text-zinc-300 flex items-center gap-1 transition-colors font-mono uppercase tracking-wider"
             >
-              <Search size={12} />
+              <Search size={11} />
               Add symbols
             </button>
           )}
         </div>
 
         {watchlistLoading ? (
-          <div className="text-zinc-600 text-xs border border-zinc-800 rounded p-4">Loading...</div>
+          <div className="text-zinc-600 text-xs font-mono border border-[#161619] rounded p-4 bg-[#050507]/20">Loading...</div>
         ) : watchlist.length === 0 ? (
-          <div className="border border-zinc-800 rounded p-5 text-center">
-            <Star size={20} className="text-zinc-700 mx-auto mb-2" />
-            <p className="text-zinc-600 text-xs mb-3">Your watchlist is empty</p>
+          <div className="border border-[#161619] rounded p-6 text-center bg-[#050507]/20">
+            <Star size={18} className="text-zinc-700 mx-auto mb-2" />
+            <p className="text-zinc-600 text-xs font-mono mb-3">Your watchlist is empty</p>
             <button
               onClick={() => navigate('/search')}
-              className="text-xs text-zinc-400 hover:text-zinc-200 border border-zinc-700 rounded px-3 py-1.5 transition-colors cursor-pointer"
+              className="text-[10px] text-zinc-400 hover:text-zinc-200 border border-[#161619] rounded px-3 py-1.5 transition-colors cursor-pointer font-mono uppercase tracking-wider"
             >
               Search stocks
             </button>
           </div>
         ) : (
-          <div className="border border-zinc-800 rounded overflow-hidden">
+          <div className="border border-[#161619] rounded overflow-hidden bg-[#050507]/20">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-800 text-zinc-500 text-xs">
-                  <th className="text-left px-4 py-2.5 font-medium">Symbol</th>
-                  <th className="text-right px-4 py-2.5 font-medium">Price</th>
-                  <th className="text-right px-4 py-2.5 font-medium">Change</th>
-                  <th className="text-right px-4 py-2.5 font-medium">%</th>
+                <tr className="border-b border-[#161619] text-zinc-600 text-[10px] uppercase tracking-widest font-mono">
+                  <th className="text-left px-5 py-3 font-medium">Symbol</th>
+                  <th className="text-right px-5 py-3 font-medium">Price</th>
+                  <th className="text-right px-5 py-3 font-medium">Change</th>
+                  <th className="text-right px-5 py-3 font-medium">%</th>
                 </tr>
               </thead>
               <tbody>
@@ -396,15 +406,15 @@ export default function Dashboard() {
                   return (
                     <tr
                       key={sym}
-                      className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-900/30 cursor-pointer transition-colors"
+                      className="border-b border-[#161619]/50 last:border-0 hover:bg-[#0a0a0d] cursor-pointer transition-colors"
                       onClick={() => navigate(`/stock/${encodeURIComponent(sym)}`)}
                     >
-                      <td className="px-4 py-3 font-mono text-zinc-200 text-sm">{sym}</td>
-                      <td className="px-4 py-3 text-right font-mono text-zinc-100">${(q.c ?? 0).toFixed(2)}</td>
-                      <td className={`px-4 py-3 text-right font-mono ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      <td className="px-5 py-3.5 font-mono text-zinc-200 text-sm">{sym}</td>
+                      <td className="px-5 py-3.5 text-right font-mono text-zinc-100">${(q.c ?? 0).toFixed(2)}</td>
+                      <td className={`px-5 py-3.5 text-right font-mono ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
                         {isUp ? '+' : ''}{(q.d ?? 0).toFixed(2)}
                       </td>
-                      <td className={`px-4 py-3 text-right font-mono ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      <td className={`px-5 py-3.5 text-right font-mono ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
                         {isUp ? '+' : ''}{(q.dp ?? 0).toFixed(2)}%
                       </td>
                     </tr>

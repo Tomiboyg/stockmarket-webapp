@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
-import { TrendingUp, TrendingDown, CheckCircle } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
 
 interface Props {
   symbol: string
@@ -54,84 +54,105 @@ export default function TradeCard({ symbol, currentPrice }: Props) {
     n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 })
 
   return (
-    <div className="border border-zinc-800 rounded p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Demo Trade</h2>
-        <div className="flex gap-1">
-          <button
-            onClick={() => { setMode('BUY'); setStatus('idle'); setMessage('') }}
-            className={`text-xs px-2.5 py-1 rounded transition-colors ${
-              mode === 'BUY'
-                ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/30'
-                : 'text-zinc-500 border border-zinc-800 hover:text-zinc-300'
-            }`}
-          >
-            <TrendingUp size={12} className="inline mr-1" />
-            Buy
-          </button>
-          <button
-            onClick={() => { setMode('SELL'); setStatus('idle'); setMessage('') }}
-            className={`text-xs px-2.5 py-1 rounded transition-colors ${
-              mode === 'SELL'
-                ? 'bg-rose-500/10 text-rose-500 border border-rose-500/30'
-                : 'text-zinc-500 border border-zinc-800 hover:text-zinc-300'
-            }`}
-          >
-            <TrendingDown size={12} className="inline mr-1" />
-            Sell
-          </button>
+    <div className="border border-[#161619] rounded bg-[#050507]/20">
+      {/* Header */}
+      <div className="px-5 pt-4 pb-3 border-b border-[#161619]">
+        <h2 className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Demo Trade</h2>
+      </div>
+
+      {/* Buy/Sell toggle */}
+      <div className="flex mx-5 mt-4 mb-3 border border-[#161619] rounded overflow-hidden">
+        <button
+          onClick={() => { setMode('BUY'); setStatus('idle'); setMessage('') }}
+          className={`flex-1 text-[10px] font-mono uppercase tracking-wider py-2 transition-all ${
+            mode === 'BUY'
+              ? 'bg-emerald-500/10 text-emerald-500 border-r border-[#161619]'
+              : 'text-zinc-600 hover:text-zinc-400 border-r border-[#161619]'
+          }`}
+        >
+          Buy
+        </button>
+        <button
+          onClick={() => { setMode('SELL'); setStatus('idle'); setMessage('') }}
+          className={`flex-1 text-[10px] font-mono uppercase tracking-wider py-2 transition-all ${
+            mode === 'SELL'
+              ? 'bg-rose-500/10 text-rose-500'
+              : 'text-zinc-600 hover:text-zinc-400'
+          }`}
+        >
+          Sell
+        </button>
+      </div>
+
+      {/* Info row */}
+      <div className="px-5 mb-4 flex items-center justify-between text-[11px] font-mono text-zinc-500">
+        <span>Cash: <span className="text-zinc-200">{formatCash(cash)}</span></span>
+        <span>Hold: <span className="text-zinc-200">{sharesOwned}</span></span>
+      </div>
+
+      {/* Input */}
+      <div className="px-5 mb-3">
+        <div className="flex items-center gap-2 border border-[#161619] rounded px-3 py-2 focus-within:border-[#ff4c24]/40 focus-within:ring-1 focus-within:ring-[#ff4c24]/20 transition-all">
+          <input
+            type="number"
+            min="1"
+            step="1"
+            value={shares}
+            onChange={(e) => { setShares(e.target.value); setStatus('idle'); setMessage('') }}
+            placeholder="0"
+            className="w-full bg-transparent text-sm font-mono text-white placeholder-zinc-700 focus:outline-none"
+          />
+          <span className="text-[10px] text-zinc-600 font-mono">shares</span>
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-xs text-zinc-400 mb-3 pb-3 border-b border-zinc-800/50">
-        <span>Cash: <span className="font-mono text-zinc-200">{formatCash(cash)}</span></span>
-        <span>Holdings: <span className="font-mono text-zinc-200">{sharesOwned} shares</span></span>
+      {/* Cost/proceeds */}
+      <div className="px-5 mb-4">
+        <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 mb-1">
+          {mode === 'BUY' ? 'Est. Cost' : 'Est. Proceeds'}
+        </div>
+        <div className="text-base font-mono font-medium text-white/80 tracking-tight">
+          {formatCash(totalCost)}
+        </div>
+        <div className="text-[10px] font-mono text-zinc-600 mt-0.5">
+          {shareCount > 0 ? `${shareCount} × ${formatCash(currentPrice)}` : ''}
+        </div>
       </div>
 
-      <div className="flex items-center gap-2 mb-3">
-        <input
-          type="number"
-          min="1"
-          step="1"
-          value={shares}
-          onChange={(e) => { setShares(e.target.value); setStatus('idle'); setMessage('') }}
-          placeholder="Shares"
-          className="w-24 bg-zinc-900 border border-zinc-800 rounded px-2.5 py-1.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-600 font-mono"
-        />
-        <span className="text-xs text-zinc-500">shares × {formatCash(currentPrice)}</span>
-      </div>
-
-      <div className="text-xs text-zinc-400 mb-3">
-        Est. {mode === 'BUY' ? 'Cost' : 'Proceeds'}: <span className="font-mono text-zinc-200">{formatCash(totalCost)}</span>
-      </div>
-
+      {/* Validation feedback */}
       {!canAfford && shares && shareCount > 0 && (
-        <div className="text-xs text-rose-500 mb-3">
-          {mode === 'BUY' ? 'Insufficient funds for this trade' : 'Not enough shares to sell'}
+        <div className="px-5 mb-3">
+          <div className="text-[10px] font-mono text-rose-500">
+            {mode === 'BUY' ? 'Insufficient funds' : 'Not enough shares'}
+          </div>
         </div>
       )}
 
+      {/* Status messages */}
       {status === 'success' && (
-        <div className="flex items-center gap-2 text-xs text-emerald-500 mb-3">
-          <CheckCircle size={14} />
+        <div className="px-5 mb-3 flex items-center gap-2 text-[10px] font-mono text-emerald-500">
+          <CheckCircle size={12} />
           {message}
         </div>
       )}
       {status === 'error' && (
-        <div className="text-xs text-rose-500 mb-3">{message}</div>
+        <div className="px-5 mb-3 text-[10px] font-mono text-rose-500">{message}</div>
       )}
 
-      <button
-        onClick={handleExecute}
-        disabled={pending || !shares || shareCount <= 0 || !canAfford}
-        className={`w-full text-xs py-2 rounded transition-colors font-medium ${
-          mode === 'BUY'
-            ? 'bg-emerald-600 hover:bg-emerald-500 text-white disabled:bg-zinc-800 disabled:text-zinc-600'
-            : 'bg-rose-600 hover:bg-rose-500 text-white disabled:bg-zinc-800 disabled:text-zinc-600'
-        }`}
-      >
-        {pending ? 'Processing...' : `${mode === 'BUY' ? 'Buy' : 'Sell'} ${symbol}`}
-      </button>
+      {/* Execute button */}
+      <div className="px-5 pb-5">
+        <button
+          onClick={handleExecute}
+          disabled={pending || !shares || shareCount <= 0 || !canAfford}
+          className={`w-full text-[10px] font-mono uppercase tracking-widest py-2.5 rounded transition-all ${
+            mode === 'BUY'
+              ? 'bg-emerald-600 hover:bg-emerald-500 text-white disabled:bg-[#161619] disabled:text-zinc-700'
+              : 'bg-rose-600 hover:bg-rose-500 text-white disabled:bg-[#161619] disabled:text-zinc-700'
+          }`}
+        >
+          {pending ? 'Processing...' : `${mode === 'BUY' ? 'Buy' : 'Sell'} ${symbol}`}
+        </button>
+      </div>
     </div>
   )
 }

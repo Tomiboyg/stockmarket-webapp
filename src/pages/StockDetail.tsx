@@ -73,34 +73,42 @@ export default function StockDetail() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="text-zinc-600 text-sm">Loading {symbol}...</div>
+        <div className="text-zinc-600 text-xs font-mono">Loading {symbol}...</div>
       </div>
     )
   }
 
   const isUp = quote ? quote.dp >= 0 : true
 
-  return (
-    <div className="p-6 max-w-5xl">
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 mb-5 transition-colors"
-      >
-        <ArrowLeft size={14} />
-        Back
-      </button>
+  const formatCash = (n: number) =>
+    n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 })
 
-      <div className="flex items-start justify-between mb-6">
+  return (
+    <div className="w-full space-y-6">
+      {/* Back + header row */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1.5 text-[10px] text-zinc-600 hover:text-zinc-300 transition-colors font-mono uppercase tracking-wider"
+        >
+          <ArrowLeft size={12} />
+          Back
+        </button>
+        <WatchlistButton symbol={symbol} />
+      </div>
+
+      {/* Title row */}
+      <div className="flex items-baseline justify-between border-b border-[#161619] pb-5">
         <div>
           <div className="flex items-baseline gap-3">
-            <h1 className="text-xl font-mono font-medium text-white">{symbol}</h1>
+            <h1 className="text-2xl font-mono font-medium text-white/90 tracking-tight">{symbol}</h1>
             {profile && (
               <span className="text-sm text-zinc-500">{profile.name}</span>
             )}
           </div>
           {quote && (
             <div className="flex items-baseline gap-3 mt-2">
-              <span className="text-2xl font-mono tabular-nums font-medium text-white">
+              <span className="text-3xl font-mono tabular-nums font-medium text-white/90 tracking-tight">
                 ${(quote.c ?? 0).toFixed(2)}
               </span>
               <span className={`font-mono text-sm tabular-nums ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
@@ -109,42 +117,37 @@ export default function StockDetail() {
             </div>
           )}
         </div>
-
-        <WatchlistButton symbol={symbol} />
       </div>
 
-      <div className="mb-6">
-        <StockChart data={candles} height={420} />
-      </div>
+      {/* Two-column layout */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+        {/* Left: chart + stats */}
+        <div className="xl:col-span-8 space-y-6">
+          <div className="border border-[#161619] rounded bg-[#020202]/40 overflow-hidden">
+            <StockChart data={candles} height={440} />
+          </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
           {quote && (
-            <div className="border border-zinc-800 rounded p-4 mb-6">
-              <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3">Statistics</h2>
-              <div className="grid grid-cols-2 gap-3">
-                <Stat label="Open" value={`$${(quote.o ?? 0).toFixed(2)}`} />
-                <Stat label="High" value={`$${(quote.h ?? 0).toFixed(2)}`} />
-                <Stat label="Low" value={`$${(quote.l ?? 0).toFixed(2)}`} />
-                <Stat label="Prev. Close" value={`$${(quote.pc ?? 0).toFixed(2)}`} />
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Stat label="Open" value={formatCash(quote.o ?? 0)} />
+              <Stat label="High" value={formatCash(quote.h ?? 0)} />
+              <Stat label="Low" value={formatCash(quote.l ?? 0)} />
+              <Stat label="Prev. Close" value={formatCash(quote.pc ?? 0)} />
             </div>
           )}
 
           {profile && (
-            <div className="border border-zinc-800 rounded p-4">
-              <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3">Company</h2>
-              <div className="grid grid-cols-2 gap-3">
-                <Stat label="Industry" value={profile.finnhubIndustry || '—'} />
-                <Stat label="Exchange" value={profile.exchange || '—'} />
-                <Stat label="IPO" value={profile.ipo || '—'} />
-                <Stat label="Market" value={profile.market || '—'} />
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Stat label="Industry" value={profile.finnhubIndustry || '—'} />
+              <Stat label="Exchange" value={profile.exchange || '—'} />
+              <Stat label="IPO" value={profile.ipo || '—'} />
+              <Stat label="Market" value={profile.market || '—'} />
             </div>
           )}
         </div>
 
-        <div className="space-y-6">
+        {/* Right: Trade card */}
+        <div className="xl:col-span-4 w-full">
           {quote && <TradeCard symbol={symbol} currentPrice={quote.c ?? 0} />}
         </div>
       </div>
@@ -154,9 +157,9 @@ export default function StockDetail() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <div className="text-[10px] text-zinc-600 uppercase tracking-wide">{label}</div>
-      <div className="text-sm font-mono tabular-nums text-zinc-300 mt-0.5">{value}</div>
+    <div className="border border-[#161619] rounded px-4 py-3 bg-[#050507]/20">
+      <div className="text-[10px] text-zinc-600 uppercase tracking-widest font-mono mb-1">{label}</div>
+      <div className="text-sm font-mono tabular-nums text-zinc-300">{value}</div>
     </div>
   )
 }
