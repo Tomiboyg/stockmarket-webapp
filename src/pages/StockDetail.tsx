@@ -13,6 +13,7 @@ import {
 import type { StockQuote, StockProfile, CandleData, NewsItem } from '../types'
 import StockChart from '../components/StockChart'
 import WatchlistButton from '../components/WatchlistButton'
+import TradeCard from '../components/TradeCard'
 import { ArrowLeft, Clock } from 'lucide-react'
 
 export default function StockDetail() {
@@ -148,7 +149,9 @@ export default function StockDetail() {
           )}
         </div>
 
-        <div>
+        <div className="space-y-6">
+          {quote && <TradeCard symbol={symbol} currentPrice={quote.c ?? 0} />}
+
           <div className="border border-zinc-800 rounded p-4">
             <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3">News</h2>
             {news.length === 0 ? (

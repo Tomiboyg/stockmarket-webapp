@@ -42,6 +42,26 @@ export interface WatchlistItem {
   created_at: string
 }
 
+export interface Holding {
+  id: string
+  user_id: string
+  symbol: string
+  shares: number
+  average_buy_price: number
+  updated_at: string
+}
+
+export interface TradeTransaction {
+  id: string
+  user_id: string
+  symbol: string
+  type: 'BUY' | 'SELL'
+  shares: number
+  price: number
+  total_amount: number
+  executed_at: string
+}
+
 export interface NewsItem {
   headline: string
   summary: string

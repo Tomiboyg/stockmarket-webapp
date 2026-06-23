@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { PortfolioProvider } from './context/PortfolioContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -13,17 +14,19 @@ export default function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route element={<ProtectedRoute />}>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/stock/:symbol" element={<StockDetail />} />
+        <PortfolioProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route element={<ProtectedRoute />}>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/search" element={<Search />} />
+                <Route path="/stock/:symbol" element={<StockDetail />} />
+              </Route>
             </Route>
-          </Route>
-        </Routes>
+          </Routes>
+        </PortfolioProvider>
       </AuthProvider>
     </ErrorBoundary>
   )
