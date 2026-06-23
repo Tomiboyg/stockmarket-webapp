@@ -4,17 +4,15 @@ import {
   getQuote,
   getProfile,
   getCandles,
-  getNews,
   generateMockQuote,
   generateMockProfile,
   generateMockCandles,
-  generateMockNews,
 } from '../services/finnhub'
-import type { StockQuote, StockProfile, CandleData, NewsItem } from '../types'
+import type { StockQuote, StockProfile, CandleData } from '../types'
 import StockChart from '../components/StockChart'
 import WatchlistButton from '../components/WatchlistButton'
 import TradeCard from '../components/TradeCard'
-import { ArrowLeft, Clock } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
 export default function StockDetail() {
   const { symbol } = useParams<{ symbol: string }>()
@@ -22,7 +20,6 @@ export default function StockDetail() {
   const [quote, setQuote] = useState<StockQuote | null>(null)
   const [profile, setProfile] = useState<StockProfile | null>(null)
   const [candles, setCandles] = useState<CandleData[]>([])
-  const [news, setNews] = useState<NewsItem[]>([])
   const [loading, setLoading] = useState(true)
   const mountedRef = useRef(true)
 
@@ -37,18 +34,16 @@ export default function StockDetail() {
 
     const load = async () => {
       try {
-        const [q, p, c, n] = await Promise.all([
+        const [q, p, c] = await Promise.all([
           getQuote(symbol).catch(() => null),
           getProfile(symbol).catch(() => null),
           getCandles(symbol, 'D', 365).catch(() => null),
-          getNews(symbol).catch(() => [] as NewsItem[]),
         ])
 
         if (mountedRef.current) {
           setQuote(q || generateMockQuote(symbol))
           setProfile(p || generateMockProfile(symbol))
           setCandles(c && c.length > 0 ? c : generateMockCandles(symbol, 365))
-          setNews(n.length > 0 ? n : generateMockNews(symbol))
           setLoading(false)
         }
       } catch {
@@ -56,7 +51,6 @@ export default function StockDetail() {
           setQuote(generateMockQuote(symbol))
           setProfile(generateMockProfile(symbol))
           setCandles(generateMockCandles(symbol, 365))
-          setNews(generateMockNews(symbol))
           setLoading(false)
         }
       }
@@ -85,15 +79,6 @@ export default function StockDetail() {
   }
 
   const isUp = quote ? quote.dp >= 0 : true
-
-  const formatNewsTime = (ts: number) => {
-    const d = new Date(ts)
-    const now = Date.now()
-    const diff = now - ts
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  }
 
   return (
     <div className="p-6 max-w-5xl">
@@ -161,40 +146,6 @@ export default function StockDetail() {
 
         <div className="space-y-6">
           {quote && <TradeCard symbol={symbol} currentPrice={quote.c ?? 0} />}
-
-          <div className="border border-zinc-800 rounded p-4">
-            <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3">News</h2>
-            {news.length === 0 ? (
-              <p className="text-zinc-600 text-xs">No recent news</p>
-            ) : (
-              <div className="space-y-3">
-                {news.map((item, i) => (
-                  <div key={i} className="pb-3 border-b border-zinc-800/50 last:border-0 last:pb-0">
-                    {item.url && item.url !== '#' ? (
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-zinc-300 hover:text-white leading-relaxed block transition-colors"
-                      >
-                        {item.headline}
-                      </a>
-                    ) : (
-                      <span className="text-xs text-zinc-300 leading-relaxed block">{item.headline}</span>
-                    )}
-                    <div className="flex items-center gap-2 mt-1.5 text-zinc-600">
-                      <span className="text-[10px]">{item.source}</span>
-                      <span className="text-zinc-700">·</span>
-                      <span className="text-[10px] flex items-center gap-1">
-                        <Clock size={10} />
-                        {formatNewsTime(item.datetime)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </div>
