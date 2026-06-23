@@ -44,6 +44,11 @@ export default function Dashboard() {
   const [txOpen, setTxOpen] = useState(false)
   const [resetConfirm, setResetConfirm] = useState(false)
   const mountedRef = useRef(true)
+  const watchlistRef = useRef(watchlist)
+  const holdingsRef = useRef(holdings)
+
+  watchlistRef.current = watchlist
+  holdingsRef.current = holdings
 
   useEffect(() => {
     mountedRef.current = true
@@ -121,6 +126,42 @@ export default function Dashboard() {
     }
     load()
   }, [holdings])
+
+  useEffect(() => {
+    const refresh = async () => {
+      if (!mountedRef.current) return
+
+      const idx: Record<string, StockQuote | null> = {}
+      for (const sym of INDEX_SYMBOLS) {
+        try { idx[sym] = await getQuote(sym) || generateMockQuote(sym) }
+        catch { idx[sym] = generateMockQuote(sym) }
+      }
+      if (mountedRef.current) setIndexQuotes(idx)
+
+      const wl = watchlistRef.current
+      if (wl.length > 0) {
+        const wlResults: Record<string, StockQuote | null> = {}
+        for (const sym of wl) {
+          try { wlResults[sym] = await getQuote(sym) || generateMockQuote(sym) }
+          catch { wlResults[sym] = generateMockQuote(sym) }
+        }
+        if (mountedRef.current) setWatchlistQuotes(wlResults)
+      }
+
+      const hl = holdingsRef.current
+      if (hl.length > 0) {
+        const hlResults: Record<string, StockQuote | null> = {}
+        for (const h of hl) {
+          try { hlResults[h.symbol] = await getQuote(h.symbol) || generateMockQuote(h.symbol) }
+          catch { hlResults[h.symbol] = generateMockQuote(h.symbol) }
+        }
+        if (mountedRef.current) setHoldingQuotes(hlResults)
+      }
+    }
+
+    const id = setInterval(refresh, 30000)
+    return () => clearInterval(id)
+  }, [])
 
   const portfolioValue = holdings.reduce((sum, h) => {
     const q = holdingQuotes[h.symbol]

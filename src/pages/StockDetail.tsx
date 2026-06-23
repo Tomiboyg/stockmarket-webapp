@@ -62,6 +62,16 @@ export default function StockDetail() {
       }
     }
     load()
+
+    const refreshQuote = async () => {
+      if (!symbol) return
+      try {
+        const q = await getQuote(symbol)
+        if (mountedRef.current) setQuote(q || generateMockQuote(symbol))
+      } catch {}
+    }
+    const id = setInterval(refreshQuote, 30000)
+    return () => { clearInterval(id) }
   }, [symbol])
 
   if (!symbol) return null
@@ -160,14 +170,18 @@ export default function StockDetail() {
               <div className="space-y-3">
                 {news.map((item, i) => (
                   <div key={i} className="pb-3 border-b border-zinc-800/50 last:border-0 last:pb-0">
-                    <a
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-zinc-300 hover:text-white leading-relaxed block transition-colors"
-                    >
-                      {item.headline}
-                    </a>
+                    {item.url && item.url !== '#' ? (
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-zinc-300 hover:text-white leading-relaxed block transition-colors"
+                      >
+                        {item.headline}
+                      </a>
+                    ) : (
+                      <span className="text-xs text-zinc-300 leading-relaxed block">{item.headline}</span>
+                    )}
                     <div className="flex items-center gap-2 mt-1.5 text-zinc-600">
                       <span className="text-[10px]">{item.source}</span>
                       <span className="text-zinc-700">·</span>
