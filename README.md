@@ -1,32 +1,53 @@
-# React + TypeScript + Vite
+# StockView — Virtual Trading Simulator
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Dark, minimalistic stock market webapp with real-time data, paper trading, and portfolio analytics.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Live Market Data** — Real-time quotes, candlestick charts, and company profiles via Finnhub API (with automatic mock fallback)
+- **Search & Discover** — Search stocks by symbol or company name with instant price previews and sparkline charts
+- **Watchlists** — Persist your favorite symbols to Supabase with one-click toggle
+- **Virtual Paper Trading** — Buy and sell stocks with $100,000 demo cash, track your portfolio performance
+- **Portfolio Dashboard** — Holdings overview with live P&L, transaction history, and portfolio value tracking
+- **Auto-Refresh** — Prices update every 30 seconds across all views
+- **Dark Monochromatic UI** — Professional financial aesthetic, zero distractions
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19, TypeScript, Tailwind CSS v4 |
+| Charts | TradingView Lightweight Charts |
+| Backend | Supabase (Auth, PostgreSQL, RLS) |
+| Data | Finnhub API (free tier) |
+| Hosting | GitHub Pages (auto-deployed via GitHub Actions) |
 
-## Expanding the Oxlint configuration
+## Getting Started
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+git clone https://github.com/Tomiboyg/stockmarket-webapp.git
+cd stockmarket-webapp
+npm install
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Create a `.env` file:
+
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_FINNHUB_API_KEY=your_finnhub_api_key
+```
+
+Run the SQL from `supabase-schema.sql` in your Supabase SQL Editor, then:
+
+```bash
+npm run dev
+```
+
+## Deployment
+
+Pushes to `main` automatically deploy to GitHub Pages via the included workflow.
+
+---
+
+Made by Majner 23.6.2026
